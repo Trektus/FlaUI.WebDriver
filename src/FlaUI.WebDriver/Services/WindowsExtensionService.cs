@@ -189,29 +189,42 @@ namespace FlaUI.WebDriver.Services
 
         public async Task ExecuteKeyScript(Session session, WindowsKeyScript action)
         {
+            var sendScanCode = action.ScanCode.HasValue ? action.ScanCode.Value : false;
             if (action.VirtualKeyCode.HasValue)
             {
                 if (action.Down.HasValue)
                 {
                     if (action.Down.Value == true)
                     {
-                        _logger.LogDebug("Pressing key {VirtualKeyCode}", action.VirtualKeyCode.Value);
-                        Keyboard.Press((VirtualKeyShort)action.VirtualKeyCode.Value);
+                        _logger.LogDebug("Pressing key {VirtualKeyCode}, send ScanCode = {1}", action.VirtualKeyCode.Value, sendScanCode);
+                        if (sendScanCode)
+                          Keyboard.PressScanCode(action.VirtualKeyCode.Value, false);
+                        else
+                          Keyboard.Press((VirtualKeyShort)action.VirtualKeyCode.Value);
                         await Task.Delay(10);
                     }
                     else
                     {
-                        _logger.LogDebug("Releasing key {VirtualKeyCode}", action.VirtualKeyCode.Value);
-                        Keyboard.Release((VirtualKeyShort)action.VirtualKeyCode.Value);
+                        _logger.LogDebug("Releasing key {VirtualKeyCode}, send ScanCode = {1}", action.VirtualKeyCode.Value, sendScanCode);
+                        if (sendScanCode)
+                          Keyboard.ReleaseScanCode(action.VirtualKeyCode.Value, false);
+                        else
+                          Keyboard.Release((VirtualKeyShort)action.VirtualKeyCode.Value);
                         await Task.Delay(10);
                     }
                 }
                 else
                 {
-                    _logger.LogDebug("Pressing and releasing key {VirtualKeyCode}", action.VirtualKeyCode.Value);
-                    Keyboard.Press((VirtualKeyShort)action.VirtualKeyCode.Value);
+                    _logger.LogDebug("Pressing and releasing key {VirtualKeyCode}, send ScanCode = {1}\"", action.VirtualKeyCode.Value, sendScanCode);
+                    if (sendScanCode)
+                      Keyboard.PressScanCode(action.VirtualKeyCode.Value, false);
+                    else
+                      Keyboard.Press((VirtualKeyShort)action.VirtualKeyCode.Value);
                     await Task.Delay(10);
-                    Keyboard.Release((VirtualKeyShort)action.VirtualKeyCode.Value);
+                    if (sendScanCode)
+                      Keyboard.ReleaseScanCode(action.VirtualKeyCode.Value, false);
+                    else
+                      Keyboard.Release((VirtualKeyShort)action.VirtualKeyCode.Value);
                     await Task.Delay(10);
                 }
             }
